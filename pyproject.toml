@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hrrrskewt"
+version = "0.1.0"
+description = "Create SkewT plots with HRRR data from CLI, with a focus on prescribed fire."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "BSD-3-Clause" }
+authors = [
+    { name = "Daniel Neamati", email = "danineamati@gmail.com" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+dependencies = [
+    "herbie-data",
+    "xarray",
+    "metpy",
+    "netcdf4",
+    "cfgrib",
+    "tyro",
+    "pandas",
+    "numpy",
+    "matplotlib",
+]
+
+[project.urls]
+Homepage = "https://github.com/danineamati/HRRRSkewT"
+
+[project.scripts]
+hrrrskewt = "hrrrskewt.cli:main"
