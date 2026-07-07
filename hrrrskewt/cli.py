@@ -1,8 +1,15 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Union
 import tyro
 
 from hrrrskewt.download import download_hrrr_data
+from hrrrskewt.plot_cli_settings import (
+    LimitsSettings,
+    HeightAxisSettings,
+    MixingHeightSettings,
+    VisualSettings,
+    IOSettings,
+)
 
 @dataclass
 class Download:
@@ -38,10 +45,19 @@ class Plot:
     """Generate a SkewT plot from downloaded HRRR NetCDF data."""
     nc_file: str
     """Path to the downloaded HRRR NetCDF file."""
-    save_dir: str = "./skewt_spot"
-    """Directory to save the generated plot."""
     rx_fire: bool = True
     """Whether to annotate the plot with variables relevant to prescribed fire."""
+
+    limits: LimitsSettings = field(default_factory=LimitsSettings)
+    """Plot limits configuration (standard, lower, full presets or custom overrides)."""
+    height: HeightAxisSettings = field(default_factory=HeightAxisSettings)
+    """Height axis rendering options."""
+    mixing: MixingHeightSettings = field(default_factory=MixingHeightSettings)
+    """Mixing height calculation parameters."""
+    visuals: VisualSettings = field(default_factory=VisualSettings)
+    """Advanced layout and styling options."""
+    io: IOSettings = field(default_factory=IOSettings)
+    """Input/Output and filename options."""
 
     def run(self) -> None:
         import os
@@ -52,18 +68,21 @@ class Plot:
             report_inversion_layer,
             report_mixing_level,
         )
-        from hrrrskewt.plot import plot_skewt_hodograph, SkewTPlotSettings
+        from hrrrskewt.plot import plot_skewt_hodograph
+        from hrrrskewt.plot_cli_settings import create_plot_settings
 
         # 1. Load NetCDF dataset
         ds = load_hrrr_data(self.nc_file)
 
-        # 2. Setup plotting settings and map output filename dynamically
-        settings = SkewTPlotSettings()
-        base_name = os.path.basename(self.nc_file)
-        if base_name.endswith(".nc"):
-            settings.save_filename = base_name.replace(".nc", ".png")
-        else:
-            settings.save_filename = base_name + ".png"
+        # 2. Setup plotting settings
+        settings = create_plot_settings(
+            limits=self.limits,
+            height=self.height,
+            mixing=self.mixing,
+            visuals=self.visuals,
+            io=self.io,
+            nc_file=self.nc_file
+        )
 
         # 3. Extract the profile and surface data
         p, T, Td, u, v, metadata = process_profile_data(ds, settings=settings)
@@ -82,7 +101,7 @@ class Plot:
             report_mixing_level(mixing_results)
 
         # 5. Generate and save the plot
-        plot_skewt_hodograph(
+        plot_path = plot_skewt_hodograph(
             p=p,
             T=T,
             Td=Td,
@@ -91,9 +110,19 @@ class Plot:
             metadata=metadata,
             settings=settings,
             mixing_results=mixing_results,
-            inversion_layers=inversion_layers,
-            save_dir=self.save_dir
+            inversion_layers=inversion_layers
         )
+
+        # 6. Save parameters report to CSV if rx_fire is enabled
+        if self.rx_fire:
+            from hrrrskewt.calc import save_rx_params_csv
+            csv_path = plot_path.rsplit(".", 1)[0] + "_rx_params.csv"
+            save_rx_params_csv(
+                csv_path=csv_path,
+                metadata=metadata,
+                mixing_results=mixing_results,
+                inversion_layers=inversion_layers
+            )
 
 
 def main() -> None:

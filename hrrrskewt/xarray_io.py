@@ -100,7 +100,7 @@ def process_profile_data(
         "lat": ds.latitude.values.item(),
         "lon": ds.longitude.values.item(),
         "valid_time": ds.valid_time.values,
-        "surface": {"t2m": t2m, "d2m": d2m, "sp": sp},
+        "surface": {"t2m": t2m, "d2m": d2m, "sp": sp, "orog": orog},
         "profile_z": z,
     }
     

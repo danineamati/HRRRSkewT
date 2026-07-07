@@ -13,74 +13,7 @@ import metpy.constants as mpconst
 from metpy.plots import SkewT, Hodograph
 from metpy.units import units
 
-@dataclass
-class SkewTPlotSettings:
-    """Configuration class for Skew-T and Hodograph plotting."""
-
-    # Subplot placements [left, bottom, width, height]
-    skewt_rect: Tuple[float, float, float, float] = (0.1, 0.1, 0.48, 0.6)
-    hodo_rect: Tuple[float, float, float, float] = (0.7, 0.5, 0.2, 0.2)
-    hodo_cb_rect: Tuple[float, float, float, float] = (0.7, 0.4, 0.2, 0.02)
-
-    # Plot limits and parameters
-    p_min: Any = 100 * units.hPa
-    p_max: Any = 1050 * units.hPa
-    t_min: Any = -30 * units.degC
-    t_max: Any = 30 * units.degC
-
-    wind_max: Any = 25 * units.meters / units.second
-    skew_rotation: int = 45
-    figsize: Tuple[int, int] = (9, 9)
-
-    # Barb plotting
-    barbs_interval: int = 1  # Plot every nth barb to reduce clutter
-    bard_offset: float = 0
-
-    # Adiabat styles and alphas
-    adiabat_alpha: float = 0.2
-    adiabat_linestyle: str = "-"
-
-    dry_adiabat_color: str = "darkorange"
-    moist_adiabat_color: str = "navy"
-
-    mixing_ratio_alpha: float = 0.2
-    mixing_ratio_linestyle: str = ":"
-
-    # Axes resolution for plotting lines
-    temp_resolution: int = 5
-    p_resolution: int = 100
-
-    # Surface markers
-    surface_marker: str = "o"
-    surface_marker_size: int = 8
-    surface_marker_color_t: str = "darkred"
-    surface_marker_color_td: str = "darkgreen"
-
-    # Height axis
-    show_height_axis: bool = True
-
-    height_units: str = "km"  # 'm' or 'km'
-    height_tick_interval: int = 2  # in meters or km
-
-    height_axis_location: str = "left"  # 'left' or 'right'
-    height_axis_left_offset: int = 60  # Only used if height_axis_location is 'left'
-    extrapolate_height_axis: bool = True
-    height_type: str = "geopotential"  # 'msl' (geometric height) or 'geopotential'
-
-    # Mixing Height calculation
-    mixing_height_temp_offset: float = 5.0 * units.delta_degC  # (offset from surface temperature)
-
-    # Legend
-    legend_loc: str = "upper left"
-    legend_outside: bool = True  # If True, place in bottom right of figure
-    legend_anchor: tuple = (0.9, 0.05)  # For outside legend placement
-
-    # Saving
-    save_filename: str = "hrrr_skewt_hgt_metpy_lapse_2.png"
-
-    # Debugging
-    show_debug_rects: bool = False
-
+from hrrrskewt.plot_cli_settings import SkewTPlotSettings
 
 def add_debug_patches(fig: plt.Figure, settings: SkewTPlotSettings) -> None:
     """Add colored rectangles to debug subplot placement."""
@@ -221,6 +154,21 @@ def draw_surface_conditions(
         color=settings.surface_marker_color_td,
         label="Dewpoint [2m]",
         linestyle="none",
+    )
+
+
+def draw_sp(skew: SkewT, metadata: dict) -> None:
+    """Draw a dotted black horizontal line indicating the surface pressure."""
+    print("Drawing surface pressure line...")
+    surf = metadata["surface"]
+    sp = surf["sp"]
+    skew.ax.axhline(
+        sp,
+        color="black",
+        linestyle=":",
+        linewidth=1.5,
+        label="Surface Pressure",
+        zorder=1
     )
 
 
@@ -444,7 +392,7 @@ def draw_skewt(
     skew.ax.set_title(
         f"HRRR Skew-T Profile\n"
         f"Analysis at: {valid_time_str}\n"
-        f"Lat: {metadata['lat']:.4f} and Lon: {metadata['lon']:.4f}",
+        f"Lat: {metadata['lat']:.4f} and Lon: {metadata['lon']:.4f}\n",
         loc="left",
     )
 
@@ -464,7 +412,8 @@ def draw_hodograph(
     print("Drawing Hodograph...")
     ax_hod = plt.axes(settings.hodo_rect)
     ax_hod.set_anchor("N")
-    h = Hodograph(ax_hod, component_range=25)
+    wind_max_val = settings.wind_max.to("m/s").magnitude if hasattr(settings.wind_max, "to") else settings.wind_max
+    h = Hodograph(ax_hod, component_range=wind_max_val)
     h.add_grid(increment=5)
 
     lc = h.plot_colormapped(
@@ -489,8 +438,7 @@ def plot_skewt_hodograph(
     metadata: dict,
     settings: Optional[SkewTPlotSettings] = None,
     mixing_results: Optional[dict] = None,
-    inversion_layers: Optional[dict] = None,
-    save_dir: str = "./skewt_spot"
+    inversion_layers: Optional[dict] = None
 ) -> str:
     """
     Main orchestration function to create and save the Skew-T / Hodograph plot.
@@ -508,6 +456,7 @@ def plot_skewt_hodograph(
     # Draw components
     skew = draw_skewt(fig, p, T, Td, u, v, metadata, settings)
     draw_surface_conditions(skew, metadata, settings)
+    draw_sp(skew, metadata)
     draw_hodograph(p, u, v, settings)
 
     if mixing_results is not None:
@@ -520,8 +469,10 @@ def plot_skewt_hodograph(
         print("Placing legend outside in bottom right of figure...")
         fig.legend(loc="lower right", bbox_to_anchor=settings.legend_anchor)
 
+    save_dir = settings.save_dir if settings else "./skewt_spot"
     os.makedirs(save_dir, exist_ok=True)
-    save_path = os.path.join(save_dir, settings.save_filename)
+    filename = (settings.save_filename if settings else None) or "hrrr_skewt.png"
+    save_path = os.path.join(save_dir, filename)
     plt.savefig(save_path, bbox_inches="tight")
     plt.close(fig)
     print(f"Skew-T plot saved to: {save_path}")
