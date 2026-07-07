@@ -1,26 +1,29 @@
 from dataclasses import dataclass, field
-from typing import Optional, Union
+from typing import Union
+
 import tyro
 
 from hrrrskewt.download import download_hrrr_data
 from hrrrskewt.plot_cli_settings import (
-    LimitsSettings,
     HeightAxisSettings,
+    IOSettings,
+    LimitsSettings,
     MixingHeightSettings,
     VisualSettings,
-    IOSettings,
 )
+
 
 @dataclass
 class Download:
     """Download HRRR data for a given location and time range."""
+
     latitude: float
     """Latitude of the target location."""
     longitude: float
     """Longitude of the target location."""
     start_time: str
     """Start date/time of the sounding, e.g., '2025-10-24T00:00'."""
-    end_time: Optional[str] = None
+    end_time: str | None = None
     """End date/time of the sounding. Defaults to start_time."""
     forecast_hour: int = 0
     """Forecast lead time in hours (0 is Analysis)."""
@@ -37,12 +40,14 @@ class Download:
             end_time=self.end_time,
             forecast_hour=self.forecast_hour,
             interval_hours=self.interval_hours,
-            save_dir=self.save_dir
+            save_dir=self.save_dir,
         )
+
 
 @dataclass
 class Plot:
     """Generate a SkewT plot from downloaded HRRR NetCDF data."""
+
     nc_file: str
     """Path to the downloaded HRRR NetCDF file."""
     rx_fire: bool = True
@@ -60,8 +65,6 @@ class Plot:
     """Input/Output and filename options."""
 
     def run(self) -> None:
-        import os
-        from hrrrskewt.xarray_io import load_hrrr_data, process_profile_data
         from hrrrskewt.calc import (
             calculate_inversion_layer,
             calculate_mixing_level,
@@ -70,6 +73,7 @@ class Plot:
         )
         from hrrrskewt.plot import plot_skewt_hodograph
         from hrrrskewt.plot_cli_settings import create_plot_settings
+        from hrrrskewt.xarray_io import load_hrrr_data, process_profile_data
 
         # 1. Load NetCDF dataset
         ds = load_hrrr_data(self.nc_file)
@@ -81,7 +85,7 @@ class Plot:
             mixing=self.mixing,
             visuals=self.visuals,
             io=self.io,
-            nc_file=self.nc_file
+            nc_file=self.nc_file,
         )
 
         # 3. Extract the profile and surface data
@@ -95,8 +99,13 @@ class Plot:
             report_inversion_layer(inversion_layers)
 
             mixing_results = calculate_mixing_level(
-                p, T, u, v, metadata["profile_z"], metadata,
-                offset=settings.mixing_height_temp_offset
+                p,
+                T,
+                u,
+                v,
+                metadata["profile_z"],
+                metadata,
+                offset=settings.mixing_height_temp_offset,
             )
             report_mixing_level(mixing_results)
 
@@ -110,18 +119,19 @@ class Plot:
             metadata=metadata,
             settings=settings,
             mixing_results=mixing_results,
-            inversion_layers=inversion_layers
+            inversion_layers=inversion_layers,
         )
 
         # 6. Save parameters report to CSV if rx_fire is enabled
         if self.rx_fire:
             from hrrrskewt.calc import save_rx_params_csv
+
             csv_path = plot_path.rsplit(".", 1)[0] + "_rx_params.csv"
             save_rx_params_csv(
                 csv_path=csv_path,
                 metadata=metadata,
                 mixing_results=mixing_results,
-                inversion_layers=inversion_layers
+                inversion_layers=inversion_layers,
             )
 
 
@@ -133,4 +143,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

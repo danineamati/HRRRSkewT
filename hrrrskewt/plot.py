@@ -1,19 +1,16 @@
 import os
-from dataclasses import dataclass
-from typing import Any, Tuple, Optional
+from typing import Any
 
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from matplotlib.ticker import NullFormatter, MultipleLocator, FuncFormatter
-
+import matplotlib.pyplot as plt
 import metpy.calc as mpcalc
-import metpy.interpolate as mpinterpolate
-import metpy.constants as mpconst
-from metpy.plots import SkewT, Hodograph
+import numpy as np
+from matplotlib.ticker import FuncFormatter, MultipleLocator, NullFormatter
+from metpy.plots import Hodograph, SkewT
 from metpy.units import units
 
 from hrrrskewt.plot_cli_settings import SkewTPlotSettings
+
 
 def add_debug_patches(fig: plt.Figure, settings: SkewTPlotSettings) -> None:
     """Add colored rectangles to debug subplot placement."""
@@ -57,10 +54,7 @@ def add_debug_patches(fig: plt.Figure, settings: SkewTPlotSettings) -> None:
 
 
 def draw_inversion_layer(
-    skew: SkewT,
-    p: np.ndarray,
-    inversion_layers: dict,
-    settings: SkewTPlotSettings
+    skew: SkewT, p: np.ndarray, inversion_layers: dict, settings: SkewTPlotSettings
 ) -> None:
     """Plot the inversion layers on the Skew-T as a band of red."""
     if len(inversion_layers["inversion_pressure"]) == 0:
@@ -85,17 +79,12 @@ def draw_inversion_layer(
             color="red",
             alpha=0.2,
             zorder=0,
-            label="Inversion Layer" if not label_added else None
+            label="Inversion Layer" if not label_added else None,
         )
         label_added = True
 
 
-def draw_mixing_height(
-    skew: SkewT,
-    p: np.ndarray,
-    metadata: dict,
-    results: dict
-) -> None:
+def draw_mixing_height(skew: SkewT, p: np.ndarray, metadata: dict, results: dict) -> None:
     """Draw the parcel trajectory and mark the mixing height."""
     if results is None:
         return
@@ -107,9 +96,10 @@ def draw_mixing_height(
         p_full = np.concatenate(([surf["sp"]], p))
     else:
         p_full = p
-    
-    parcel_path = mpcalc.dry_lapse(p_full, surf["t2m"] + results["offset"],
-                                   reference_pressure=surf["sp"])
+
+    parcel_path = mpcalc.dry_lapse(
+        p_full, surf["t2m"] + results["offset"], reference_pressure=surf["sp"]
+    )
 
     mask_higher_p = p_full >= results["pressure"]
     lowest_avail_p_idx = np.argmin(p_full[mask_higher_p])
@@ -119,18 +109,28 @@ def draw_mixing_height(
     else:
         mask = mask_higher_p
 
-    skew.plot(p_full[mask], parcel_path[mask].to("degC"), color="black",
-              linestyle="--", linewidth=1.5, label="Parcel Path (Dry)")
+    skew.plot(
+        p_full[mask],
+        parcel_path[mask].to("degC"),
+        color="black",
+        linestyle="--",
+        linewidth=1.5,
+        label="Parcel Path (Dry)",
+    )
 
-    skew.plot(results["pressure"], results["temperature"].to("degC"),
-              marker="o", markersize=10, color="black",
-              label="Mixing Height", linestyle="none")
+    skew.plot(
+        results["pressure"],
+        results["temperature"].to("degC"),
+        marker="o",
+        markersize=10,
+        color="black",
+        label="Mixing Height",
+        linestyle="none",
+    )
 
 
 def draw_surface_conditions(
-    skew: SkewT,
-    metadata: dict,
-    settings: SkewTPlotSettings
+    skew: SkewT, metadata: dict, settings: SkewTPlotSettings
 ) -> None:
     """Draw surface T and Td points on the Skew-T."""
     print("Drawing surface conditions...")
@@ -168,15 +168,12 @@ def draw_sp(skew: SkewT, metadata: dict) -> None:
         linestyle=":",
         linewidth=1.5,
         label="Surface Pressure",
-        zorder=1
+        zorder=1,
     )
 
 
 def draw_height_axis(
-    skew: SkewT,
-    p: np.ndarray,
-    z: np.ndarray,
-    settings: SkewTPlotSettings
+    skew: SkewT, p: np.ndarray, z: np.ndarray, settings: SkewTPlotSettings
 ) -> Any:
     """Add a secondary y-axis for height using MetPy for transformations."""
     print(f"Drawing height axis ({settings.height_type})...")
@@ -204,7 +201,7 @@ def draw_height_axis(
 
             h_unit = units.km if settings.height_units == "km" else units.meters
 
-            idx_low = (p_vals[valid] > p_xp[-1])
+            idx_low = p_vals[valid] > p_xp[-1]
             if np.any(idx_low):
                 z_anchor = z_fp[-1] * h_unit
                 p_anchor = p_xp[-1] * units.hPa
@@ -215,7 +212,7 @@ def draw_height_axis(
                 h = z_anchor + (h_std - h_anchor_std)
                 z_raw[idx_low] = h.to(h_unit).magnitude
 
-            idx_high = (p_vals[valid] < p_xp[0])
+            idx_high = p_vals[valid] < p_xp[0]
             if np.any(idx_high):
                 z_anchor = z_fp[0] * h_unit
                 p_anchor = p_xp[0] * units.hPa
@@ -246,7 +243,7 @@ def draw_height_axis(
         log_p = np.interp(z_vals, z_xp_rev, log_p_fp_rev)
         h_unit = units.km if settings.height_units == "km" else units.meters
 
-        idx_low = (z_vals < z_xp_rev[0])
+        idx_low = z_vals < z_xp_rev[0]
         if np.any(idx_low):
             p_anchor = p_xp[-1] * units.hPa
             z_anchor = z_fp[-1] * h_unit
@@ -257,7 +254,7 @@ def draw_height_axis(
             p_val = mpcalc.height_to_pressure_std(h_std)
             log_p[idx_low] = np.log(p_val.to(units.hPa).magnitude)
 
-        idx_high = (z_vals > z_xp_rev[-1])
+        idx_high = z_vals > z_xp_rev[-1]
         if np.any(idx_high):
             p_anchor = p_xp[0] * units.hPa
             z_anchor = z_fp[0] * h_unit
@@ -276,7 +273,9 @@ def draw_height_axis(
     )
 
     unit_label = "km" if settings.height_units == "km" else "m"
-    height_label = "MSL Altitude" if settings.height_type == "msl" else "Geopotential Height"
+    height_label = (
+        "MSL Altitude" if settings.height_type == "msl" else "Geopotential Height"
+    )
     ax2.set_ylabel(f"{height_label} ({unit_label})")
 
     if settings.height_axis_location == "left":
@@ -292,16 +291,29 @@ def draw_height_axis(
     ax2.yaxis.set_minor_formatter(NullFormatter())
 
     from matplotlib.ticker import FixedLocator
+
     if settings.extrapolate_height_axis:
         ax2.yaxis.set_major_locator(MultipleLocator(settings.height_tick_interval))
         ax2.yaxis.set_minor_locator(MultipleLocator(settings.height_tick_interval / 2))
     else:
-        min_h = (np.ceil(np.nanmin(z_mag) / settings.height_tick_interval) * settings.height_tick_interval) + HEIGHT_OFFSET
-        max_h = (np.floor(np.nanmax(z_mag) / settings.height_tick_interval) * settings.height_tick_interval) + HEIGHT_OFFSET
-        ticks = np.arange(min_h, max_h + settings.height_tick_interval, settings.height_tick_interval)
+        min_h = (
+            np.ceil(np.nanmin(z_mag) / settings.height_tick_interval)
+            * settings.height_tick_interval
+        ) + HEIGHT_OFFSET
+        max_h = (
+            np.floor(np.nanmax(z_mag) / settings.height_tick_interval)
+            * settings.height_tick_interval
+        ) + HEIGHT_OFFSET
+        ticks = np.arange(
+            min_h, max_h + settings.height_tick_interval, settings.height_tick_interval
+        )
         ax2.yaxis.set_major_locator(FixedLocator(ticks))
 
-        minor_ticks = np.arange(min_h, max_h + settings.height_tick_interval, settings.height_tick_interval / 2)
+        minor_ticks = np.arange(
+            min_h,
+            max_h + settings.height_tick_interval,
+            settings.height_tick_interval / 2,
+        )
         ax2.yaxis.set_minor_locator(FixedLocator(minor_ticks))
 
     # Draw manual gridlines workaround
@@ -309,20 +321,34 @@ def draw_height_axis(
     z_at_limits = p_to_z(p_limits)
 
     if settings.extrapolate_height_axis:
-        min_h = np.floor(np.nanmin(z_at_limits) / settings.height_tick_interval) * settings.height_tick_interval
-        max_h = np.ceil(np.nanmax(z_at_limits) / settings.height_tick_interval) * settings.height_tick_interval
+        min_h = (
+            np.floor(np.nanmin(z_at_limits) / settings.height_tick_interval)
+            * settings.height_tick_interval
+        )
+        max_h = (
+            np.ceil(np.nanmax(z_at_limits) / settings.height_tick_interval)
+            * settings.height_tick_interval
+        )
     else:
-        min_h = (np.ceil(np.nanmin(z_mag) / settings.height_tick_interval) * settings.height_tick_interval) + HEIGHT_OFFSET
-        max_h = (np.floor(np.nanmax(z_mag) / settings.height_tick_interval) * settings.height_tick_interval) + HEIGHT_OFFSET
+        min_h = (
+            np.ceil(np.nanmin(z_mag) / settings.height_tick_interval)
+            * settings.height_tick_interval
+        ) + HEIGHT_OFFSET
+        max_h = (
+            np.floor(np.nanmax(z_mag) / settings.height_tick_interval)
+            * settings.height_tick_interval
+        ) + HEIGHT_OFFSET
 
-    h_ticks = np.arange(min_h, max_h + settings.height_tick_interval, settings.height_tick_interval)
+    h_ticks = np.arange(
+        min_h, max_h + settings.height_tick_interval, settings.height_tick_interval
+    )
 
     for h in h_ticks:
         p_val_arr = z_to_p(h)
         p_val = p_val_arr[0]
 
         if not np.isnan(p_val) and p_val >= 10:
-            skew.ax.axhline(p_val, color='pink', linestyle='--', alpha=0.5, zorder=1)
+            skew.ax.axhline(p_val, color="pink", linestyle="--", alpha=0.5, zorder=1)
 
     return ax2
 
@@ -335,7 +361,7 @@ def draw_skewt(
     u: np.ndarray,
     v: np.ndarray,
     metadata: dict,
-    settings: SkewTPlotSettings
+    settings: SkewTPlotSettings,
 ) -> SkewT:
     """Draw the Skew-T plot component."""
     print("Drawing Skew-T...")
@@ -359,9 +385,8 @@ def draw_skewt(
     )
     skew.ax.set_yticks(new_y_ticks)
 
-    interval = np.where(p >= settings.p_min)[0][::settings.barbs_interval]
-    skew.plot_barbs(p[interval], u[interval], v[interval],
-                    xloc=1 - settings.bard_offset)
+    interval = np.where(p >= settings.p_min)[0][:: settings.barbs_interval]
+    skew.plot_barbs(p[interval], u[interval], v[interval], xloc=1 - settings.bard_offset)
 
     new_x_ticks_units = new_x_ticks * units.degC
     skew.plot_dry_adiabats(
@@ -378,9 +403,7 @@ def draw_skewt(
         alpha=settings.adiabat_alpha,
         linestyle=settings.adiabat_linestyle,
     )
-    skew.plot_mixing_lines(
-        label="Mixing Ratio Lines", alpha=settings.mixing_ratio_alpha
-    )
+    skew.plot_mixing_lines(label="Mixing Ratio Lines", alpha=settings.mixing_ratio_alpha)
 
     skew.ax.set_ylim(settings.p_max, settings.p_min)
     skew.ax.set_xlim(settings.t_min, settings.t_max)
@@ -403,16 +426,17 @@ def draw_skewt(
 
 
 def draw_hodograph(
-    p: np.ndarray,
-    u: np.ndarray,
-    v: np.ndarray,
-    settings: SkewTPlotSettings
+    p: np.ndarray, u: np.ndarray, v: np.ndarray, settings: SkewTPlotSettings
 ) -> Any:
     """Draw the Hodograph and its colorbar."""
     print("Drawing Hodograph...")
     ax_hod = plt.axes(settings.hodo_rect)
     ax_hod.set_anchor("N")
-    wind_max_val = settings.wind_max.to("m/s").magnitude if hasattr(settings.wind_max, "to") else settings.wind_max
+    wind_max_val = (
+        settings.wind_max.to("m/s").magnitude
+        if hasattr(settings.wind_max, "to")
+        else settings.wind_max
+    )
     h = Hodograph(ax_hod, component_range=wind_max_val)
     h.add_grid(increment=5)
 
@@ -423,9 +447,7 @@ def draw_hodograph(
     ax_hod.set_ylabel("v (m/s)")
 
     cax = plt.axes(settings.hodo_cb_rect)
-    plt.colorbar(
-        lc, cax=cax, orientation="horizontal", label="Pressure (hPa)", pad=0.05
-    )
+    plt.colorbar(lc, cax=cax, orientation="horizontal", label="Pressure (hPa)", pad=0.05)
     return ax_hod
 
 
@@ -436,9 +458,9 @@ def plot_skewt_hodograph(
     u: np.ndarray,
     v: np.ndarray,
     metadata: dict,
-    settings: Optional[SkewTPlotSettings] = None,
-    mixing_results: Optional[dict] = None,
-    inversion_layers: Optional[dict] = None
+    settings: SkewTPlotSettings | None = None,
+    mixing_results: dict | None = None,
+    inversion_layers: dict | None = None,
 ) -> str:
     """
     Main orchestration function to create and save the Skew-T / Hodograph plot.
@@ -476,5 +498,5 @@ def plot_skewt_hodograph(
     plt.savefig(save_path, bbox_inches="tight")
     plt.close(fig)
     print(f"Skew-T plot saved to: {save_path}")
-    
+
     return save_path
