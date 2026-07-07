@@ -499,7 +499,7 @@ def plot_skewt_hodograph(
         print("Placing legend outside in bottom right of figure...")
         fig.legend(loc="lower right", bbox_to_anchor=settings.legend_anchor)
 
-    save_dir = settings.save_dir if settings else "./skewt_spot"
+    save_dir = settings.save_dir if settings else "./skewt_point"
     os.makedirs(save_dir, exist_ok=True)
     filename = (settings.save_filename if settings else None) or "hrrr_skewt.png"
     save_path = os.path.join(save_dir, filename)
