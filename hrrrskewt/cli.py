@@ -44,14 +44,64 @@ class Plot:
     """Whether to annotate the plot with variables relevant to prescribed fire."""
 
     def run(self) -> None:
-        # Placeholder for plotting logic
-        print(f"Plotting {self.nc_file} (rx-fire={self.rx_fire})...")
-        print("Plot command is not fully implemented yet.")
+        import os
+        from hrrrskewt.xarray_io import load_hrrr_data, process_profile_data
+        from hrrrskewt.calc import (
+            calculate_inversion_layer,
+            calculate_mixing_level,
+            report_inversion_layer,
+            report_mixing_level,
+        )
+        from hrrrskewt.plot import plot_skewt_hodograph, SkewTPlotSettings
+
+        # 1. Load NetCDF dataset
+        ds = load_hrrr_data(self.nc_file)
+
+        # 2. Setup plotting settings and map output filename dynamically
+        settings = SkewTPlotSettings()
+        base_name = os.path.basename(self.nc_file)
+        if base_name.endswith(".nc"):
+            settings.save_filename = base_name.replace(".nc", ".png")
+        else:
+            settings.save_filename = base_name + ".png"
+
+        # 3. Extract the profile and surface data
+        p, T, Td, u, v, metadata = process_profile_data(ds, settings=settings)
+
+        # 4. Perform calculation of inversion and mixing heights if rx_fire is enabled
+        inversion_layers = None
+        mixing_results = None
+        if self.rx_fire:
+            inversion_layers = calculate_inversion_layer(p, T, metadata["profile_z"])
+            report_inversion_layer(inversion_layers)
+
+            mixing_results = calculate_mixing_level(
+                p, T, u, v, metadata["profile_z"], metadata,
+                offset=settings.mixing_height_temp_offset
+            )
+            report_mixing_level(mixing_results)
+
+        # 5. Generate and save the plot
+        plot_skewt_hodograph(
+            p=p,
+            T=T,
+            Td=Td,
+            u=u,
+            v=v,
+            metadata=metadata,
+            settings=settings,
+            mixing_results=mixing_results,
+            inversion_layers=inversion_layers,
+            save_dir=self.save_dir
+        )
+
 
 def main() -> None:
     # Use tyro to parse CLI arguments for the Union of commands
     command = tyro.cli(Union[Download, Plot])
     command.run()
 
+
 if __name__ == "__main__":
     main()
+

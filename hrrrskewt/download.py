@@ -59,6 +59,7 @@ def retrieve_hrrr_data(
     fh = FastHerbie(dates, model="hrrr", fxx=fxx, product="prs")
     
     ds_out = fh.xarray(SKEWT_VARS_RE, remove_grib=False)
+    print("Found the data.")
     
     if isinstance(ds_out, list):
         print(f"fh.xarray returned a list of {len(ds_out)} datasets. Merging...")
