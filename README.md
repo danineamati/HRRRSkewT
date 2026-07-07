@@ -14,7 +14,7 @@ HRRRSkewT is a Python CLI tool designed to download NOAA High-Resolution Rapid R
 
 ## Example Skew-T plot
 
-![Example Skew-T from HRRRSkewT](example_plot\hrrr_skewt_38p573_-122p691_20251023_1900.png)
+![Example Skew-T from HRRRSkewT](example_plot/hrrr_skewt_38p573_-122p691_20251023_1900.png)
 
 ## Installation
 
