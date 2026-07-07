@@ -76,6 +76,7 @@ class SkewTPlotSettings:
     legend_anchor: tuple = (0.9, 0.05)  # For outside legend placement
 
     # Saving
+    save_dir: str = "./skewt_spot"
     save_filename: Optional[str] = None
 
     # Debugging
@@ -489,8 +490,7 @@ def plot_skewt_hodograph(
     metadata: dict,
     settings: Optional[SkewTPlotSettings] = None,
     mixing_results: Optional[dict] = None,
-    inversion_layers: Optional[dict] = None,
-    save_dir: str = "./skewt_spot"
+    inversion_layers: Optional[dict] = None
 ) -> str:
     """
     Main orchestration function to create and save the Skew-T / Hodograph plot.
@@ -520,8 +520,9 @@ def plot_skewt_hodograph(
         print("Placing legend outside in bottom right of figure...")
         fig.legend(loc="lower right", bbox_to_anchor=settings.legend_anchor)
 
+    save_dir = settings.save_dir if settings else "./skewt_spot"
     os.makedirs(save_dir, exist_ok=True)
-    filename = settings.save_filename or "hrrr_skewt.png"
+    filename = (settings.save_filename if settings else None) or "hrrr_skewt.png"
     save_path = os.path.join(save_dir, filename)
     plt.savefig(save_path, bbox_inches="tight")
     plt.close(fig)

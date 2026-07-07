@@ -8,6 +8,7 @@ from hrrrskewt.plot_cli_settings import (
     HeightAxisSettings,
     MixingHeightSettings,
     VisualSettings,
+    IOSettings,
 )
 
 @dataclass
@@ -44,12 +45,8 @@ class Plot:
     """Generate a SkewT plot from downloaded HRRR NetCDF data."""
     nc_file: str
     """Path to the downloaded HRRR NetCDF file."""
-    save_dir: str = "./skewt_spot"
-    """Directory to save the generated plot."""
     rx_fire: bool = True
     """Whether to annotate the plot with variables relevant to prescribed fire."""
-    save_filename: Optional[str] = None
-    """Optional name for the output image file (defaults to matching the input filename)."""
 
     limits: LimitsSettings = field(default_factory=LimitsSettings)
     """Plot limits configuration (standard, lower, full presets or custom overrides)."""
@@ -59,6 +56,8 @@ class Plot:
     """Mixing height calculation parameters."""
     visuals: VisualSettings = field(default_factory=VisualSettings)
     """Advanced layout and styling options."""
+    io: IOSettings = field(default_factory=IOSettings)
+    """Input/Output and filename options."""
 
     def run(self) -> None:
         import os
@@ -75,22 +74,14 @@ class Plot:
         # 1. Load NetCDF dataset
         ds = load_hrrr_data(self.nc_file)
 
-        # Determine target output filename if not provided
-        target_save_filename = self.save_filename
-        if target_save_filename is None:
-            base_name = os.path.basename(self.nc_file)
-            if base_name.endswith(".nc"):
-                target_save_filename = base_name.replace(".nc", ".png")
-            else:
-                target_save_filename = base_name + ".png"
-
         # 2. Setup plotting settings
         settings = create_plot_settings(
             limits=self.limits,
             height=self.height,
             mixing=self.mixing,
             visuals=self.visuals,
-            save_filename=target_save_filename
+            io=self.io,
+            nc_file=self.nc_file
         )
 
         # 3. Extract the profile and surface data
@@ -119,8 +110,7 @@ class Plot:
             metadata=metadata,
             settings=settings,
             mixing_results=mixing_results,
-            inversion_layers=inversion_layers,
-            save_dir=self.save_dir
+            inversion_layers=inversion_layers
         )
 
 
