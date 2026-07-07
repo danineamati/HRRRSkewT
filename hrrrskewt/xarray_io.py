@@ -106,6 +106,8 @@ def process_profile_data(
         "valid_time": ds.valid_time.values,
         "surface": {"t2m": t2m, "d2m": d2m, "sp": sp, "orog": orog},
         "profile_z": z,
+        "forecast_hour": ds.attrs.get("forecast_hour", 0),
+        "product": ds.attrs.get("product", "prs"),
     }
 
     # If valid_time is an array, take the first element

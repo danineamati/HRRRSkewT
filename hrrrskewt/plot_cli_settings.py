@@ -70,7 +70,7 @@ class SkewTPlotSettings:
     legend_anchor: tuple = (0.9, 0.05)  # For outside legend placement
 
     # Saving
-    save_dir: str = "./skewt_spot"
+    save_dir: str = "./skewt_point"
     save_filename: str | None = None
 
     # Debugging
@@ -195,7 +195,7 @@ class VisualSettings:
 class IOSettings:
     """Input/Output and filename options."""
 
-    save_dir: str = "./skewt_spot"
+    save_dir: str = "./skewt_point"
     """Directory to save the generated plot."""
     save_filename: str | None = None
     """Optional name for the output image file (overrides all autogeneration)."""
