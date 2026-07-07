@@ -20,11 +20,22 @@ HRRRSkewT is a Python CLI tool designed to download NOAA High-Resolution Rapid R
 
 Ensure you have a Python environment (Python 3.10+ recommended) active. Clone the repository and install it in editable mode:
 
+Optional, but recommended, to use conda:
+
+```bash
+conda create -n hrrrskewt_env -c conda-forge python=3.12
+conda activate hrrrskewt_env
+```
+
+To use the repository:
+
 ```bash
 git clone https://github.com/danineamati/HRRRSkewT.git
 cd HRRRSkewT
 pip install -e .
 ```
+
+If you are on Windows or having issues, please use conda and follow the instructions at [Herbie issue #380](https://github.com/blaylockbk/Herbie/discussions/380).
 
 *Note: The CLI dependencies include `herbie-data[extras]`, `metpy`, `xarray`, `matplotlib`, and `tyro`.*
 
