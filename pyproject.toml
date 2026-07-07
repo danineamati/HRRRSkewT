@@ -9,9 +9,7 @@ description = "Create SkewT plots with HRRR data from CLI, with a focus on presc
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "BSD-3-Clause" }
-authors = [
-    { name = "Daniel Neamati", email = "danineamati@gmail.com" }
-]
+authors = [{ name = "Daniel Neamati", email = "danineamati@gmail.com" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -41,3 +39,25 @@ Homepage = "https://github.com/danineamati/HRRRSkewT"
 
 [project.scripts]
 hrrrskewt = "hrrrskewt.cli:main"
+
+[project.optional-dependencies]
+dev = ["ruff", "pre-commit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes (import checking, logic errors)
+    "I",   # isort (import sorting order)
+    "B",   # flake8-bugbear (prevent common mistakes)
+    "UP",  # pyupgrade (modernize syntax patterns)
+    "RUF", # Ruff-specific recommendations
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["hrrrskewt"]
