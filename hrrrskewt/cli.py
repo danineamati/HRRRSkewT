@@ -1,8 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Union
 import tyro
 
 from hrrrskewt.download import download_hrrr_data
+from hrrrskewt.plot_cli_settings import (
+    LimitsSettings,
+    HeightAxisSettings,
+    MixingHeightSettings,
+    VisualSettings,
+)
 
 @dataclass
 class Download:
@@ -42,6 +48,17 @@ class Plot:
     """Directory to save the generated plot."""
     rx_fire: bool = True
     """Whether to annotate the plot with variables relevant to prescribed fire."""
+    save_filename: Optional[str] = None
+    """Optional name for the output image file (defaults to matching the input filename)."""
+
+    limits: LimitsSettings = field(default_factory=LimitsSettings)
+    """Plot limits configuration (standard, lower, full presets or custom overrides)."""
+    height: HeightAxisSettings = field(default_factory=HeightAxisSettings)
+    """Height axis rendering options."""
+    mixing: MixingHeightSettings = field(default_factory=MixingHeightSettings)
+    """Mixing height calculation parameters."""
+    visuals: VisualSettings = field(default_factory=VisualSettings)
+    """Advanced layout and styling options."""
 
     def run(self) -> None:
         import os
@@ -52,18 +69,29 @@ class Plot:
             report_inversion_layer,
             report_mixing_level,
         )
-        from hrrrskewt.plot import plot_skewt_hodograph, SkewTPlotSettings
+        from hrrrskewt.plot import plot_skewt_hodograph
+        from hrrrskewt.plot_cli_settings import create_plot_settings
 
         # 1. Load NetCDF dataset
         ds = load_hrrr_data(self.nc_file)
 
-        # 2. Setup plotting settings and map output filename dynamically
-        settings = SkewTPlotSettings()
-        base_name = os.path.basename(self.nc_file)
-        if base_name.endswith(".nc"):
-            settings.save_filename = base_name.replace(".nc", ".png")
-        else:
-            settings.save_filename = base_name + ".png"
+        # Determine target output filename if not provided
+        target_save_filename = self.save_filename
+        if target_save_filename is None:
+            base_name = os.path.basename(self.nc_file)
+            if base_name.endswith(".nc"):
+                target_save_filename = base_name.replace(".nc", ".png")
+            else:
+                target_save_filename = base_name + ".png"
+
+        # 2. Setup plotting settings
+        settings = create_plot_settings(
+            limits=self.limits,
+            height=self.height,
+            mixing=self.mixing,
+            visuals=self.visuals,
+            save_filename=target_save_filename
+        )
 
         # 3. Extract the profile and surface data
         p, T, Td, u, v, metadata = process_profile_data(ds, settings=settings)

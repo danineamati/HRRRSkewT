@@ -76,7 +76,7 @@ class SkewTPlotSettings:
     legend_anchor: tuple = (0.9, 0.05)  # For outside legend placement
 
     # Saving
-    save_filename: str = "hrrr_skewt_hgt_metpy_lapse_2.png"
+    save_filename: Optional[str] = None
 
     # Debugging
     show_debug_rects: bool = False
@@ -521,7 +521,8 @@ def plot_skewt_hodograph(
         fig.legend(loc="lower right", bbox_to_anchor=settings.legend_anchor)
 
     os.makedirs(save_dir, exist_ok=True)
-    save_path = os.path.join(save_dir, settings.save_filename)
+    filename = settings.save_filename or "hrrr_skewt.png"
+    save_path = os.path.join(save_dir, filename)
     plt.savefig(save_path, bbox_inches="tight")
     plt.close(fig)
     print(f"Skew-T plot saved to: {save_path}")
