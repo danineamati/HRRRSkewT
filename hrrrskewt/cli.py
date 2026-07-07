@@ -12,14 +12,14 @@ class Download:
     longitude: float
     """Longitude of the target location."""
     start_time: str
-    """Start date/time of the sounding, e.g., '2025-10-24T00:00:00'."""
+    """Start date/time of the sounding, e.g., '2025-10-24T00:00'."""
     end_time: Optional[str] = None
     """End date/time of the sounding. Defaults to start_time."""
     forecast_hour: int = 0
     """Forecast lead time in hours (0 is Analysis)."""
     interval_hours: int = 1
     """Interval between soundings in hours."""
-    save_dir: str = "./hrrr_netcdf"
+    save_dir: str = "./data_hrrr"
     """Directory to save the NetCDF file."""
 
     def run(self) -> None:

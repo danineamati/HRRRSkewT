@@ -25,7 +25,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Atmospheric Science",
 ]
 dependencies = [
-    "herbie-data",
+    "herbie-data[extras]", # Need this for pick_points() to work (scikit-learn)
     "xarray",
     "metpy",
     "netcdf4",

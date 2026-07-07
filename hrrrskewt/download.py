@@ -19,7 +19,7 @@ def download_hrrr_data(
     end_time: Optional[str] = None,
     forecast_hour: int = 0,
     interval_hours: int = 1,
-    save_dir: str = "./hrrr_netcdf"
+    save_dir: str = "./data_hrrr"
 ) -> str:
     """
     Download HRRR meteorological data for a specific coordinate point and save as a NetCDF file.
@@ -27,9 +27,9 @@ def download_hrrr_data(
     Parameters:
         latitude: Latitude of the target location.
         longitude: Longitude of the target location.
-        start_time: Start date/time of the sounding, e.g., "2025-10-24T00:00:00".
+        start_time: Start date/time of the sounding, e.g., "2025-10-24T00:00".
         end_time: End date/time of the sounding. If None, set to start_time.
-        forecast_hour: Forecast lead time in hours (0 is Analysis/typical sounding).
+        forecast_hour: Forecast lead time in hours (0 is Analysis).
         interval_hours: Time interval in hours for multiple soundings date range.
         save_dir: Directory where the output NetCDF file should be saved.
         
