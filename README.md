@@ -2,7 +2,6 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/github/<USER>/<REPO>/blob/<BRANCH>/<PATH>.ipynb](https://colab.research.google.com/drive/1uCDYgd2NtUOIFGi_UgKewQsXXCn_YPG9?usp=sharing))
 
-
 Are you interested in atmospheric vertical profiles, but find yourself writing custom code every time? Or do you analyze prescribed burn data and feel that the typical vertical profile plot does not include the diagnostic variables that you care about?
 
 HRRRSkewT is a Python CLI tool designed to download NOAA High-Resolution Rapid Refresh (HRRR) weather forecast data for specific coordinate points and generate publication-quality Skew-T Log-P / Hodograph diagrams using MetPy, with a particular focus on variables relevant to prescribed fire (Rx fire) planning ⚕️🔥.
@@ -17,7 +16,7 @@ HRRRSkewT is a Python CLI tool designed to download NOAA High-Resolution Rapid R
 
 ## Example Skew-T plot
 
-![Example Skew-T from HRRRSkewT](example_plot/hrrr_skewt_38p573_-122p691_20251023_1900.png)
+![Example Skew-T from HRRRSkewT](example_plot\hrrr_skewt_38p360_-105p733_20260327_1600_prs_f00_standard.png)
 
 ## Installation
 
