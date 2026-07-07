@@ -2,7 +2,76 @@ import os
 from dataclasses import dataclass
 from typing import Tuple, Optional, Literal, Any
 from metpy.units import units
-from hrrrskewt.plot import SkewTPlotSettings
+
+@dataclass
+class SkewTPlotSettings:
+    """Configuration class for Skew-T and Hodograph plotting."""
+
+    # Subplot placements [left, bottom, width, height]
+    skewt_rect: Tuple[float, float, float, float] = (0.1, 0.1, 0.48, 0.6)
+    hodo_rect: Tuple[float, float, float, float] = (0.7, 0.5, 0.2, 0.2)
+    hodo_cb_rect: Tuple[float, float, float, float] = (0.7, 0.4, 0.2, 0.02)
+
+    # Plot limits and parameters
+    p_min: Any = 100 * units.hPa
+    p_max: Any = 1050 * units.hPa
+    t_min: Any = -30 * units.degC
+    t_max: Any = 30 * units.degC
+
+    wind_max: Any = 25 * units.meters / units.second
+    skew_rotation: int = 45
+    figsize: Tuple[int, int] = (9, 9)
+
+    # Barb plotting
+    barbs_interval: int = 1  # Plot every nth barb to reduce clutter
+    bard_offset: float = 0
+
+    # Adiabat styles and alphas
+    adiabat_alpha: float = 0.2
+    adiabat_linestyle: str = "-"
+
+    dry_adiabat_color: str = "darkorange"
+    moist_adiabat_color: str = "navy"
+
+    mixing_ratio_alpha: float = 0.2
+    mixing_ratio_linestyle: str = ":"
+
+    # Axes resolution for plotting lines
+    temp_resolution: int = 5
+    p_resolution: int = 100
+
+    # Surface markers
+    surface_marker: str = "o"
+    surface_marker_size: int = 8
+    surface_marker_color_t: str = "darkred"
+    surface_marker_color_td: str = "darkgreen"
+
+    # Height axis
+    show_height_axis: bool = True
+
+    height_units: str = "km"  # 'm' or 'km'
+    height_tick_interval: int = 2  # in meters or km
+
+    height_axis_location: str = "left"  # 'left' or 'right'
+    height_axis_left_offset: int = 60  # Only used if height_axis_location is 'left'
+    extrapolate_height_axis: bool = True
+    height_type: str = "geopotential"  # 'msl' (geometric height) or 'geopotential'
+
+    # Mixing Height calculation
+    mixing_height_temp_offset: float = 5.0 * units.delta_degC  # (offset from surface temperature)
+
+    # Legend
+    legend_loc: str = "upper left"
+    legend_outside: bool = True  # If True, place in bottom right of figure
+    legend_anchor: tuple = (0.9, 0.05)  # For outside legend placement
+
+    # Saving
+    save_dir: str = "./skewt_spot"
+    save_filename: Optional[str] = None
+
+    # Debugging
+    show_debug_rects: bool = False
+
 
 @dataclass
 class LimitsSettings:
@@ -17,6 +86,8 @@ class LimitsSettings:
     """Custom minimum temperature limit in °C (overrides preset)."""
     t_max: Optional[float] = None
     """Custom maximum temperature limit in °C (overrides preset)."""
+    wind_max: Optional[float] = None
+    """Custom maximum wind speed display limit on the hodograph in m/s (default: 25.0)."""
 
     def resolve(self) -> Tuple[float, float, float, float]:
         """Resolve preset and overrides to return (p_min, p_max, t_min, t_max)."""
@@ -157,7 +228,7 @@ def create_plot_settings(
         t_min=t_min_val * units.degC,
         t_max=t_max_val * units.degC,
         
-        wind_max=25 * units.meters / units.second,
+        wind_max=(limits.wind_max if limits.wind_max is not None else 25.0) * units.meters / units.second,
         skew_rotation=visuals.skew_rotation,
         figsize=visuals.figsize,
         

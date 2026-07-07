@@ -13,75 +13,7 @@ import metpy.constants as mpconst
 from metpy.plots import SkewT, Hodograph
 from metpy.units import units
 
-@dataclass
-class SkewTPlotSettings:
-    """Configuration class for Skew-T and Hodograph plotting."""
-
-    # Subplot placements [left, bottom, width, height]
-    skewt_rect: Tuple[float, float, float, float] = (0.1, 0.1, 0.48, 0.6)
-    hodo_rect: Tuple[float, float, float, float] = (0.7, 0.5, 0.2, 0.2)
-    hodo_cb_rect: Tuple[float, float, float, float] = (0.7, 0.4, 0.2, 0.02)
-
-    # Plot limits and parameters
-    p_min: Any = 100 * units.hPa
-    p_max: Any = 1050 * units.hPa
-    t_min: Any = -30 * units.degC
-    t_max: Any = 30 * units.degC
-
-    wind_max: Any = 25 * units.meters / units.second
-    skew_rotation: int = 45
-    figsize: Tuple[int, int] = (9, 9)
-
-    # Barb plotting
-    barbs_interval: int = 1  # Plot every nth barb to reduce clutter
-    bard_offset: float = 0
-
-    # Adiabat styles and alphas
-    adiabat_alpha: float = 0.2
-    adiabat_linestyle: str = "-"
-
-    dry_adiabat_color: str = "darkorange"
-    moist_adiabat_color: str = "navy"
-
-    mixing_ratio_alpha: float = 0.2
-    mixing_ratio_linestyle: str = ":"
-
-    # Axes resolution for plotting lines
-    temp_resolution: int = 5
-    p_resolution: int = 100
-
-    # Surface markers
-    surface_marker: str = "o"
-    surface_marker_size: int = 8
-    surface_marker_color_t: str = "darkred"
-    surface_marker_color_td: str = "darkgreen"
-
-    # Height axis
-    show_height_axis: bool = True
-
-    height_units: str = "km"  # 'm' or 'km'
-    height_tick_interval: int = 2  # in meters or km
-
-    height_axis_location: str = "left"  # 'left' or 'right'
-    height_axis_left_offset: int = 60  # Only used if height_axis_location is 'left'
-    extrapolate_height_axis: bool = True
-    height_type: str = "geopotential"  # 'msl' (geometric height) or 'geopotential'
-
-    # Mixing Height calculation
-    mixing_height_temp_offset: float = 5.0 * units.delta_degC  # (offset from surface temperature)
-
-    # Legend
-    legend_loc: str = "upper left"
-    legend_outside: bool = True  # If True, place in bottom right of figure
-    legend_anchor: tuple = (0.9, 0.05)  # For outside legend placement
-
-    # Saving
-    save_dir: str = "./skewt_spot"
-    save_filename: Optional[str] = None
-
-    # Debugging
-    show_debug_rects: bool = False
-
+from hrrrskewt.plot_cli_settings import SkewTPlotSettings
 
 def add_debug_patches(fig: plt.Figure, settings: SkewTPlotSettings) -> None:
     """Add colored rectangles to debug subplot placement."""
@@ -480,7 +412,7 @@ def draw_hodograph(
     print("Drawing Hodograph...")
     ax_hod = plt.axes(settings.hodo_rect)
     ax_hod.set_anchor("N")
-    h = Hodograph(ax_hod, component_range=25)
+    h = Hodograph(ax_hod, component_range=settings.wind_max)
     h.add_grid(increment=5)
 
     lc = h.plot_colormapped(
