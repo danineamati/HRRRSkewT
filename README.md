@@ -1,8 +1,11 @@
 # HRRRSkewT
 
-Are you interested in atmospheric vertical profiles, but find your self writing custom code every time? Or do you analyze prescribed burn data and feel that the typical vertical profile plot do not include the diagnostic variables that you care about?
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/github/<USER>/<REPO>/blob/<BRANCH>/<PATH>.ipynb](https://colab.research.google.com/drive/1uCDYgd2NtUOIFGi_UgKewQsXXCn_YPG9?usp=sharing))
 
-HRRRSkewT is a Python CLI tool designed to download NOAA High-Resolution Rapid Refresh (HRRR) weather forecast data for specific coordinate points and generate publication-quality Skew-T Log-P / Hodograph diagrams using MetPy, with a particular focus on variables relevant to prescribed fire (Rx fire) planning.
+
+Are you interested in atmospheric vertical profiles, but find yourself writing custom code every time? Or do you analyze prescribed burn data and feel that the typical vertical profile plot does not include the diagnostic variables that you care about?
+
+HRRRSkewT is a Python CLI tool designed to download NOAA High-Resolution Rapid Refresh (HRRR) weather forecast data for specific coordinate points and generate publication-quality Skew-T Log-P / Hodograph diagrams using MetPy, with a particular focus on variables relevant to prescribed fire (Rx fire) planning ⚕️🔥.
 
 ## Features
 
@@ -10,7 +13,7 @@ HRRRSkewT is a Python CLI tool designed to download NOAA High-Resolution Rapid R
 - **Skew-T & Hodograph Plots**: Render combined Skew-T Log-P profiles and wind hodographs in a single figure.
 - **Inversion Layer Detection**: Calculate and report atmospheric temperature inversion layers, highlighting them visually on the Skew-T chart.
 - **Mixing Height Calculation**: Automatically compute the mixing height using the parcel method (dry adiabat intersection from surface temperature offset) and annotate the parcel path and mixing level.
-- **Dynamic File Naming**: Saved datasets and figures automatically include coordinate coordinates and valid times in their names.
+- **Dynamic File Naming**: Saved datasets and figures automatically include coordinates and valid times in their names.
 
 ## Example Skew-T plot
 
@@ -88,7 +91,7 @@ hrrrskewt plot --nc-file <path_to_nc_file> [options]
 **Global Options**:
 
 - `--nc-file`: Path to the NetCDF file containing point data (required).
-- `--rx-fire` / `--no-rx-fire`: Whether to calculate and draw mixing height, parcel trajectory, and inversion layer annotations (default: `--rx-fire`). If enabled, also writes a detailed parameter summary CSV file.
+- `--rx-fire` / `--no-rx-fire`: Whether to calculate and draw mixing height, parcel trajectory, and inversion layer annotations (default: `--rx-fire`). If enabled, it also writes a detailed parameter summary CSV file.
 
 Below are the additional options. Please use `--help` for the updated, full list of options.
 
@@ -111,7 +114,7 @@ Below are the additional options. Please use `--help` for the updated, full list
 - `--height.show` / `--height.no-show`: Whether to display the secondary height axis (default: `--height.show`).
 - `--height.type`: Reference level coordinate: `geopotential` (above sea level/geopotential) or `msl` (geometric height). Default: `geopotential`.
 - `--height.units`: Height axis scale: `km` or `m`. Default: `km`.
-- `--height.tick-interval`: Floating point interval between ticks (default: `2.0`).
+- `--height.tick-interval`: Floating-point interval between ticks (default: `2.0`).
 
 **Mixing Height Options (`--mixing`)**:
 
@@ -119,7 +122,7 @@ Below are the additional options. Please use `--help` for the updated, full list
 
 **Visuals and Aesthetic Options (`--visuals`)**:
 
-There are many options. Please use `--help` for full list.
+There are many options. Please use `--help` for the full list.
 
 **Example**:
 
