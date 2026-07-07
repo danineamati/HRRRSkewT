@@ -225,6 +225,21 @@ def draw_surface_conditions(
     )
 
 
+def draw_sp(skew: SkewT, metadata: dict) -> None:
+    """Draw a dotted black horizontal line indicating the surface pressure."""
+    print("Drawing surface pressure line...")
+    surf = metadata["surface"]
+    sp = surf["sp"]
+    skew.ax.axhline(
+        sp,
+        color="black",
+        linestyle=":",
+        linewidth=1.5,
+        label="Surface Pressure",
+        zorder=1
+    )
+
+
 def draw_height_axis(
     skew: SkewT,
     p: np.ndarray,
@@ -445,7 +460,7 @@ def draw_skewt(
     skew.ax.set_title(
         f"HRRR Skew-T Profile\n"
         f"Analysis at: {valid_time_str}\n"
-        f"Lat: {metadata['lat']:.4f} and Lon: {metadata['lon']:.4f}",
+        f"Lat: {metadata['lat']:.4f} and Lon: {metadata['lon']:.4f}\n",
         loc="left",
     )
 
@@ -508,6 +523,7 @@ def plot_skewt_hodograph(
     # Draw components
     skew = draw_skewt(fig, p, T, Td, u, v, metadata, settings)
     draw_surface_conditions(skew, metadata, settings)
+    draw_sp(skew, metadata)
     draw_hodograph(p, u, v, settings)
 
     if mixing_results is not None:
