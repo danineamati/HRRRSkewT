@@ -36,6 +36,7 @@ def report_inversion_layer(inversion_layers: dict, banner_num: int = 50) -> None
             inversion_layers["inversion_pressure"],
             inversion_layers["inversion_temperature"],
             inversion_layers["inversion_height"],
+            strict=True,
         )
     ):
         print(f"Inversion {i + 1}:")
@@ -261,6 +262,7 @@ def save_rx_params_csv(
                 inversion_layers["inversion_pressure"],
                 inversion_layers["inversion_temperature"],
                 inversion_layers["inversion_height"],
+                strict=True,
             )
         ):
             idx = i + 1

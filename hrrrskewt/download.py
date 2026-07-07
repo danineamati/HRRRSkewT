@@ -10,7 +10,10 @@ from herbie.fast import FastHerbie
 #   - TMP:surface, PRES:surface, HGT:surface (topography)
 #   - TMP:2 m above ground, DPT:2 m above ground
 #   - UGRD:10 m above ground, VGRD:10 m above ground
-SKEWT_VARS_RE = r":(?:TMP|DPT|UGRD|VGRD|HGT|PRES):(?:(?:[0-9]+ mb)|(?:surface)|(?:[2,10] m above ground))"
+SKEWT_VARS_RE = (
+    r":(?:TMP|DPT|UGRD|VGRD|HGT|PRES):"
+    r"(?:(?:[0-9]+ mb)|(?:surface)|(?:[2,10] m above ground))"
+)
 
 
 def parse_date_inputs(
@@ -35,7 +38,8 @@ def parse_date_inputs(
 
 def retrieve_hrrr_data(dates: pd.DatetimeIndex, forecast_hour: int = 0) -> xr.Dataset:
     """
-    Query and retrieve HRRR data using FastHerbie for the specified dates and forecast hour.
+    Query and retrieve HRRR data using FastHerbie for the specified dates
+    and forecast hour.
 
     Parameters:
         dates: DatetimeIndex of dates to download.
@@ -136,7 +140,8 @@ def download_hrrr_data(
     save_dir: str = "./data_hrrr",
 ) -> str:
     """
-    Download HRRR meteorological data for a specific coordinate point and save as a NetCDF file.
+    Download HRRR meteorological data for a specific coordinate point
+    and save as a NetCDF file.
 
     Parameters:
         latitude: Latitude of the target location.

@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Union
 
 import tyro
 
@@ -137,7 +136,7 @@ class Plot:
 
 def main() -> None:
     # Use tyro to parse CLI arguments for the Union of commands
-    command = tyro.cli(Union[Download, Plot])
+    command = tyro.cli(Download | Plot)
     command.run()
 
 

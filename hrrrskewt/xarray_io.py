@@ -32,7 +32,8 @@ def process_profile_data(
 
     Parameters:
         ds: The input xarray Dataset.
-        settings: Optional settings object (e.g. SkewTPlotSettings) to inspect height_type.
+        settings: Optional settings object (e.g. SkewTPlotSettings)
+            to inspect height_type.
 
     Returns:
         A tuple of:
