@@ -411,10 +411,18 @@ def draw_skewt(
     if settings.show_height_axis:
         draw_height_axis(skew, p, metadata["profile_z"], settings)
 
-    valid_time_str = np.datetime_as_string(metadata["valid_time"], unit="m")
+    valid_time_str = np.datetime_as_string(metadata["valid_time"], unit="m").replace(
+        "T", ""
+    )
+    forecast_hour = metadata.get("forecast_hour", 0)
+    if forecast_hour > 0:
+        time_line = f"{forecast_hour:02d} Hour Forecast. Valid at: {valid_time_str}"
+    else:
+        time_line = f"Analysis Valid at: {valid_time_str}"
+
     skew.ax.set_title(
         f"HRRR Skew-T Profile\n"
-        f"Analysis at: {valid_time_str}\n"
+        f"{time_line}\n"
         f"Lat: {metadata['lat']:.4f} and Lon: {metadata['lon']:.4f}\n",
         loc="left",
     )

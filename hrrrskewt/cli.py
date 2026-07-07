@@ -28,6 +28,8 @@ class Download:
     """Forecast lead time in hours (0 is Analysis)."""
     interval_hours: int = 1
     """Interval between soundings in hours."""
+    product: str = "prs"
+    """HRRR product name, e.g. 'prs' or 'nat'."""
     save_dir: str = "./data_hrrr"
     """Directory to save the NetCDF file."""
 
@@ -39,6 +41,7 @@ class Download:
             end_time=self.end_time,
             forecast_hour=self.forecast_hour,
             interval_hours=self.interval_hours,
+            product=self.product,
             save_dir=self.save_dir,
         )
 

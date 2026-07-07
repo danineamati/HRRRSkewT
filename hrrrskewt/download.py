@@ -36,7 +36,9 @@ def parse_date_inputs(
     return pd.date_range(start_time, end_time, freq=f"{interval_hours}h")
 
 
-def retrieve_hrrr_data(dates: pd.DatetimeIndex, forecast_hour: int = 0) -> xr.Dataset:
+def retrieve_hrrr_data(
+    dates: pd.DatetimeIndex, forecast_hour: int = 0, product: str = "prs"
+) -> xr.Dataset:
     """
     Query and retrieve HRRR data using FastHerbie for the specified dates
     and forecast hour.
@@ -44,6 +46,7 @@ def retrieve_hrrr_data(dates: pd.DatetimeIndex, forecast_hour: int = 0) -> xr.Da
     Parameters:
         dates: DatetimeIndex of dates to download.
         forecast_hour: Forecast lead time in hours (0 is Analysis).
+        product: HRRR product name, e.g. 'prs' or 'nat'.
 
     Returns:
         An xarray Dataset containing the HRRR data for the selected variables.
@@ -55,8 +58,8 @@ def retrieve_hrrr_data(dates: pd.DatetimeIndex, forecast_hour: int = 0) -> xr.Da
     print(f"Forecast Hours: {fxx}")
     print(f"Searching for variables with regex: {SKEWT_VARS_RE}")
 
-    print("Attempting to use HRRR 'prs' product for full vertical resolution...")
-    fh = FastHerbie(dates, model="hrrr", fxx=fxx, product="prs")
+    print(f"Attempting to use HRRR '{product}' product for full vertical resolution...")
+    fh = FastHerbie(dates, model="hrrr", fxx=fxx, product=product)
 
     ds_out = fh.xarray(SKEWT_VARS_RE, remove_grib=False)
     print("Found the data.")
@@ -96,6 +99,8 @@ def save_point_data(
     latitude: float,
     longitude: float,
     start_time: str,
+    forecast_hour: int = 0,
+    product: str = "prs",
     save_dir: str = "./data_hrrr",
 ) -> str:
     """
@@ -106,6 +111,8 @@ def save_point_data(
         latitude: Latitude of the target location.
         longitude: Longitude of the target location.
         start_time: Start date/time string, used to name the output file.
+        forecast_hour: Forecast lead time in hours.
+        product: HRRR product name.
         save_dir: Directory where the output NetCDF file should be saved.
 
     Returns:
@@ -119,7 +126,12 @@ def save_point_data(
     lat_str = f"{latitude:.3f}".replace(".", "p")
     lon_str = f"{longitude:.3f}".replace(".", "p")
 
-    filename = f"hrrr_skewt_{lat_str}_{lon_str}_{start_str}.nc"
+    # Add attributes to dataset before saving
+    ds_point.attrs["forecast_hour"] = forecast_hour
+    ds_point.attrs["product"] = product
+
+    fxx_str = f"f{forecast_hour:02d}"
+    filename = f"hrrr_skewt_{lat_str}_{lon_str}_{start_str}_{product}_{fxx_str}.nc"
     save_path = os.path.join(save_dir, filename)
 
     print("\n--- Saving Point Data to NetCDF ---")
@@ -137,6 +149,7 @@ def download_hrrr_data(
     end_time: str | None = None,
     forecast_hour: int = 0,
     interval_hours: int = 1,
+    product: str = "prs",
     save_dir: str = "./data_hrrr",
 ) -> str:
     """
@@ -150,6 +163,7 @@ def download_hrrr_data(
         end_time: End date/time of the sounding. If None, set to start_time.
         forecast_hour: Forecast lead time in hours (0 is Analysis).
         interval_hours: Time interval in hours for multiple soundings date range.
+        product: HRRR product name.
         save_dir: Directory where the output NetCDF file should be saved.
 
     Returns:
@@ -159,12 +173,14 @@ def download_hrrr_data(
     dates = parse_date_inputs(start_time, end_time, interval_hours)
 
     # 2. Query and retrieve data
-    ds = retrieve_hrrr_data(dates, forecast_hour)
+    ds = retrieve_hrrr_data(dates, forecast_hour, product)
 
     # 3. Extract nearest point
     ds_point = extract_point_data(ds, latitude, longitude)
 
     # 4. Save to NetCDF
-    save_path = save_point_data(ds_point, latitude, longitude, start_time, save_dir)
+    save_path = save_point_data(
+        ds_point, latitude, longitude, start_time, forecast_hour, product, save_dir
+    )
 
     return save_path
