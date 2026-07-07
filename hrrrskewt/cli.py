@@ -101,7 +101,7 @@ class Plot:
             report_mixing_level(mixing_results)
 
         # 5. Generate and save the plot
-        plot_skewt_hodograph(
+        plot_path = plot_skewt_hodograph(
             p=p,
             T=T,
             Td=Td,
@@ -112,6 +112,17 @@ class Plot:
             mixing_results=mixing_results,
             inversion_layers=inversion_layers
         )
+
+        # 6. Save parameters report to CSV if rx_fire is enabled
+        if self.rx_fire:
+            from hrrrskewt.calc import save_rx_params_csv
+            csv_path = plot_path.rsplit(".", 1)[0] + "_rx_params.csv"
+            save_rx_params_csv(
+                csv_path=csv_path,
+                metadata=metadata,
+                mixing_results=mixing_results,
+                inversion_layers=inversion_layers
+            )
 
 
 def main() -> None:

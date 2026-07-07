@@ -412,7 +412,8 @@ def draw_hodograph(
     print("Drawing Hodograph...")
     ax_hod = plt.axes(settings.hodo_rect)
     ax_hod.set_anchor("N")
-    h = Hodograph(ax_hod, component_range=settings.wind_max)
+    wind_max_val = settings.wind_max.to("m/s").magnitude if hasattr(settings.wind_max, "to") else settings.wind_max
+    h = Hodograph(ax_hod, component_range=wind_max_val)
     h.add_grid(increment=5)
 
     lc = h.plot_colormapped(
