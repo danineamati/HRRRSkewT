@@ -1,6 +1,6 @@
 # HRRRSkewT
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/github/<USER>/<REPO>/blob/<BRANCH>/<PATH>.ipynb](https://colab.research.google.com/drive/1uCDYgd2NtUOIFGi_UgKewQsXXCn_YPG9?usp=sharing))
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1uCDYgd2NtUOIFGi_UgKewQsXXCn_YPG9?usp=sharing)
 
 Are you interested in atmospheric vertical profiles, but find yourself writing custom code every time? Or do you analyze prescribed burn data and feel that the typical vertical profile plot does not include the diagnostic variables that you care about?
 
