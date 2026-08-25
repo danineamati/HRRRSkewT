@@ -48,6 +48,10 @@ class SkewTPlotSettings:
     surface_marker_color_t: str = "darkred"
     surface_marker_color_td: str = "darkgreen"
 
+    # PBL Height line
+    pbl_color: str = "royalblue"
+    pbl_linestyle: str = "--"
+
     # Height axis
     show_height_axis: bool = True
 
@@ -181,6 +185,10 @@ class VisualSettings:
     """Color for surface temperature marker."""
     surface_marker_color_td: str = "darkgreen"
     """Color for surface dewpoint marker."""
+    pbl_color: str = "tab:purple"
+    """Color for the PBL height line on the Skew-T."""
+    pbl_linestyle: str = "-."
+    """Line style for the PBL height line (e.g. '-', '--', ':', '-.')."""
     legend_loc: str = "upper left"
     """Legend location inside the plot (if legend-outside is False)."""
     legend_outside: bool = True
@@ -272,6 +280,8 @@ def create_plot_settings(
         legend_loc=visuals.legend_loc,
         legend_outside=visuals.legend_outside,
         legend_anchor=visuals.legend_anchor,
+        pbl_color=visuals.pbl_color,
+        pbl_linestyle=visuals.pbl_linestyle,
         save_dir=io.save_dir,
         save_filename=target_save_filename,
         show_debug_rects=visuals.show_debug_rects,

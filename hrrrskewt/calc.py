@@ -183,6 +183,10 @@ def save_rx_params_csv(
         rows.append(
             ["orography", f"{surf['orog'].magnitude:.2f}", str(surf["orog"].units)]
         )
+    if "blh" in surf and surf["blh"] is not None:
+        rows.append(
+            ["pbl_height", f"{surf['blh'].magnitude:.2f}", str(surf["blh"].units)]
+        )
 
     # 2. Mixing Height (if available)
     if mixing_results is not None:

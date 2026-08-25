@@ -4,6 +4,7 @@ from typing import Any
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import metpy.calc as mpcalc
+import metpy.interpolate as mpinterpolate
 import numpy as np
 from matplotlib.ticker import FuncFormatter, MultipleLocator, NullFormatter
 from metpy.plots import Hodograph, SkewT
@@ -126,7 +127,47 @@ def draw_mixing_height(skew: SkewT, p: np.ndarray, metadata: dict, results: dict
         color="black",
         label="Mixing Height",
         linestyle="none",
+        zorder=4,
     )
+
+
+def draw_pbl_height(
+    skew: SkewT, p: np.ndarray, metadata: dict, settings: SkewTPlotSettings
+) -> None:
+    """Draw a horizontal line indicating the planetary boundary layer height (PBLH)."""
+    surf = metadata["surface"]
+    blh = surf.get("blh")
+    if blh is None:
+        return
+
+    print("Drawing PBL height line...")
+    orog = surf.get("orog", 0.0 * units.meters)
+    z = metadata["profile_z"]
+
+    # Calculate MSL altitude of PBL top
+    pbl_z_msl = orog + blh
+
+    try:
+        # Interpolate pressure at this MSL altitude
+        p_pbl = mpinterpolate.interpolate_1d(pbl_z_msl, z, p)
+        p_pbl_hpa = p_pbl.to(units.hPa).magnitude
+
+        if not np.isnan(p_pbl_hpa):
+            blh_m = blh.to("meter").magnitude
+            label = f"PBL Height ({blh_m:.0f} m AGL)"
+            color = getattr(settings, "pbl_color", "royalblue")
+            linestyle = getattr(settings, "pbl_linestyle", "--")
+
+            skew.ax.axhline(
+                p_pbl_hpa,
+                color=color,
+                linestyle=linestyle,
+                linewidth=2,
+                label=label,
+                zorder=2,
+            )
+    except Exception as e:
+        print(f"WARNING: Could not plot PBL height: {e}")
 
 
 def draw_surface_conditions(
@@ -144,6 +185,7 @@ def draw_surface_conditions(
         color=settings.surface_marker_color_t,
         label="Temperature [2m]",
         linestyle="none",
+        zorder=4,
     )
 
     skew.plot(
@@ -154,6 +196,7 @@ def draw_surface_conditions(
         color=settings.surface_marker_color_td,
         label="Dewpoint [2m]",
         linestyle="none",
+        zorder=4,
     )
 
 
@@ -166,9 +209,9 @@ def draw_sp(skew: SkewT, metadata: dict) -> None:
         sp,
         color="black",
         linestyle=":",
-        linewidth=1.5,
+        linewidth=2,
         label="Surface Pressure",
-        zorder=1,
+        zorder=2,
     )
 
 
@@ -368,8 +411,10 @@ def draw_skewt(
     skew = SkewT(fig, rotation=settings.skew_rotation, rect=settings.skewt_rect)
     skew.ax.set_anchor("NE")
 
-    skew.plot(p, T.to("degC"), "r", marker=".", linewidth=2, label="Temperature")
-    skew.plot(p, Td.to("degC"), "g", marker=".", linewidth=2, label="Dewpoint")
+    skew.plot(
+        p, T.to("degC"), "r", marker=".", linewidth=2, label="Temperature", zorder=3
+    )
+    skew.plot(p, Td.to("degC"), "g", marker=".", linewidth=2, label="Dewpoint", zorder=3)
 
     skew.ax.set_ylabel("Pressure (hPa)")
     skew.ax.set_xlabel("Temperature (°C)")
@@ -487,6 +532,7 @@ def plot_skewt_hodograph(
     skew = draw_skewt(fig, p, T, Td, u, v, metadata, settings)
     draw_surface_conditions(skew, metadata, settings)
     draw_sp(skew, metadata)
+    draw_pbl_height(skew, p, metadata, settings)
     draw_hodograph(p, u, v, settings)
 
     if mixing_results is not None:
