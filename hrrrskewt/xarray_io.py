@@ -71,12 +71,14 @@ def process_profile_data(
     sp = ds["sp"].values.item() * units.Pa
     sp = sp.to(units.hPa)
     orog = ds["orog"].values.item() * units.meters
+    blh = ds["blh"].values.item() * units.meters if "blh" in ds else None
 
     print(
         f"\nSurface pressure: {sp:.2f}, "
         f"2m temperature: {t2m:.2f}, "
         f"2m dewpoint: {d2m:.2f}, "
-        f"Orography: {orog:.2f}\n"
+        f"Orography: {orog:.2f}, "
+        f"PBL Height: {f'{blh:.2f}' if blh is not None else 'None'}\n"
     )
 
     # Convert geopotential height to MSL altitude if requested
@@ -104,7 +106,7 @@ def process_profile_data(
         "lat": ds.latitude.values.item(),
         "lon": ds.longitude.values.item(),
         "valid_time": ds.valid_time.values,
-        "surface": {"t2m": t2m, "d2m": d2m, "sp": sp, "orog": orog},
+        "surface": {"t2m": t2m, "d2m": d2m, "sp": sp, "orog": orog, "blh": blh},
         "profile_z": z,
         "forecast_hour": ds.attrs.get("forecast_hour", 0),
         "product": ds.attrs.get("product", "prs"),
