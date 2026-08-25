@@ -7,11 +7,11 @@ from herbie.fast import FastHerbie
 # Regex to capture all required profile and surface variables:
 # - Profile: TMP, DPT, UGRD, VGRD, HGT at isobaric levels (e.g., 1000 mb, 850 mb)
 # - Surface/Near-surface:
-#   - TMP:surface, PRES:surface, HGT:surface (topography)
+#   - TMP:surface, PRES:surface, HGT:surface (topography), HPBL:surface (PBL height)
 #   - TMP:2 m above ground, DPT:2 m above ground
 #   - UGRD:10 m above ground, VGRD:10 m above ground
 SKEWT_VARS_RE = (
-    r":(?:TMP|DPT|UGRD|VGRD|HGT|PRES):"
+    r":(?:TMP|DPT|UGRD|VGRD|HGT|PRES|HPBL):"
     r"(?:(?:[0-9]+ mb)|(?:surface)|(?:[2,10] m above ground))"
 )
 
